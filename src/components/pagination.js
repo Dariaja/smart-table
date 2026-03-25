@@ -13,10 +13,10 @@ export const initPagination = ({pages, fromRow, toRow, totalRows}, createPage) =
 
         // @todo: #2.6 — обработать действия
         if (action) switch(action.name) {
-            case 'prev': page = Math.max(1, page - 1); break;
-            case 'next': page = Math.min(pageCount, page + 1); break;
-            case 'first': page = 1; break;
-            case 'last': page = pageCount; break;
+          case 'prev': page = Math.max(1, page - 1); break;
+          case 'next': page = Math.min(pageCount, page + 1); break;
+          case 'first': page = 1; break;
+          case 'last': page = pageCount; break;
         }
 
         // @todo: #2.4 — получить список видимых страниц и вывести их
@@ -24,7 +24,7 @@ export const initPagination = ({pages, fromRow, toRow, totalRows}, createPage) =
         pages.replaceChildren(...visiblePages.map(pageNumber => {
             const el = pageTemplate.cloneNode(true);
             return createPage(el, pageNumber, pageNumber === page);
-        }));
+        })) 
 
         // @todo: #2.5 — обновить статус пагинации
         fromRow.textContent = (page - 1) * rowsPerPage + 1;
@@ -36,4 +36,3 @@ export const initPagination = ({pages, fromRow, toRow, totalRows}, createPage) =
         return data.slice(skip, skip + rowsPerPage);
     }
 }
-
