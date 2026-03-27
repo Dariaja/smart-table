@@ -1,4 +1,4 @@
-import {sortCollection, sortMap} from "../lib/sort.js";
+import { sortCollection, sortMap } from "../lib/sort.js";
 
 export function initSorting(columns) {
     return (data, state, action) => {
@@ -17,6 +17,7 @@ export function initSorting(columns) {
                     column.dataset.value = 'none';
                 }
             });
+
         } else {
             // @todo: #3.3 — получить выбранный режим сортировки
             columns.forEach(column => {
