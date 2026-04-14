@@ -1,41 +1,70 @@
-import { createComparison, defaultRules } from "../lib/compare.js";
+export function initFiltering(elements) {
+  const updateIndexes = (elements, indexes) => {
+    Object.keys(indexes).forEach((elementName) => {
+      elements[elementName].append(
+        ...Object.values(indexes[elementName]).map((name) => {
+          const el = document.createElement("option");
+          el.value = name;
+          el.textContent = name;
+          return el;
+        }),
+      );
+    });
+  };
 
-// @todo: #4.3 — настроить компаратор
-const compare = createComparison(defaultRules);
+  // формирование query (ВМЕСТО фильтрации массива)
+  const applyFiltering = (query, state, action) => {
+    if (action) {
+      const button = action.target || action;
+      if (button && button.name === "clear") {
+        const fieldName = button.getAttribute("data-field"); // "date" или "customer"
 
-export function initFiltering(elements, indexes) {
-    // @todo: #4.1 — заполнить выпадающие списки опциями
-    Object.keys(indexes).forEach((name) => {
-        elements[name].append(
-            ...Object.values(indexes[name]).map(value => {
-                const option = document.createElement('option');
-                option.value = value;
-                option.textContent = value;
-                return option;
-            })
-        );
+        let filterWrapper = button.parentElement;
+
+        const input =
+          (filterWrapper &&
+            filterWrapper.querySelector &&
+            filterWrapper.querySelector("input, select")) ||
+          (button.closest &&
+            button.closest(".table-column") &&
+            button.closest(".table-column").querySelector("input, select"));
+        if (input) {
+          input.value = "";
+        }
+
+        if (fieldName && state && typeof state === "object") {
+          if (
+            state.filters &&
+            Object.prototype.hasOwnProperty.call(state.filters, fieldName)
+          ) {
+            state.filters[fieldName] = "";
+          } else {
+            state[fieldName] = "";
+          }
+        }
+      }
+    }
+
+    // @todo: #4.5 — отфильтровать данные, используя компаратор
+    const filter = {};
+    Object.keys(elements).forEach((key) => {
+      if (elements[key]) {
+        if (
+          ["INPUT", "SELECT"].includes(elements[key].tagName) &&
+          elements[key].value
+        ) {
+          filter[`filter[${elements[key].name}]`] = elements[key].value;
+        }
+      }
     });
 
-    return (data, state, action) => {
-        // @todo: #4.2 — обработать очистку поля
-        if (action && action.name === 'clear') {
-            const field = action.dataset.field;
+    return Object.keys(filter).length
+      ? Object.assign({}, query, filter)
+      : query;
+  };
 
-            const input = action.parentElement.querySelector('input');
-            if (input) input.value = '';
-
-            state[field] = '';
-        }
-
-        // дополнительная обработка диапазона (суммы)
-        const from = parseFloat(state.totalFrom);
-        const to = parseFloat(state.totalTo);
-
-        if (!isNaN(from) || !isNaN(to)) {
-            state.total = [from, to];
-        }
-
-        // @todo: #4.5 — отфильтровать данные используя компаратор
-        return data.filter(row => compare(row, state));
-    }
+  return {
+    updateIndexes,
+    applyFiltering,
+  };
 }
